@@ -8,7 +8,6 @@ from django.contrib.auth.models import (
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
-from rest_framework.authtoken.admin import User
 
 
 class UserManager(BaseUserManager):
@@ -50,17 +49,17 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-def user_image_file_path(instance: User, filename: str) -> str:
+def user_image_file_path(instance, filename: str) -> str:
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.email)}-{uuid.uuid4()}{extension}"
 
-    return os.path.join("uploads/movies/users/", filename)
+    return os.path.join("uploads/posts/users/", filename)
 
 
 class User(AbstractUser):
     username = None
     nickname = models.CharField(_("nickname"), max_length=15, unique=True)
-    date_of_birth = models.DateField(_("date of birth"))
+    date_of_birth = models.DateField(_("date of birth"), null=True, blank=True)
     biography = models.CharField(
         _("short biography"), max_length=400, blank=True
     )
