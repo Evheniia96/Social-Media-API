@@ -5,15 +5,31 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from user.models import User
 from user.serializers import UserSerializer, AuthTokenSerializer
 
 
-class CreateUserView(generics.CreateAPIView):
+class UserPagination(PageNumberPagination):
+    page_size = 2
+    max_page_size = 100
+
+
+class CreateUserView(generics.ListCreateAPIView):
     serializer_class = UserSerializer
+    pagination_class = UserPagination
+
+    def get_queryset(self):
+        queryset = get_user_model().objects.all()
+        nickname = self.request.query_params.get("nickname")
+        if nickname:
+            queryset = queryset.filter(nickname__icontains=nickname)
+
+        return queryset
 
 
 class LoginUserView(ObtainAuthToken):
