@@ -1,17 +1,19 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from user.models import User
-from user.serializers import UserSerializer, AuthTokenSerializer
+from user.models import UserFollowing
+from user.permissions import IsOwnerFollowing
+from user.serializers import UserSerializer, AuthTokenSerializer, FollowingSerializer
 
 
 class UserPagination(PageNumberPagination):
@@ -24,7 +26,10 @@ class CreateUserView(generics.ListCreateAPIView):
     pagination_class = UserPagination
 
     def get_queryset(self):
-        queryset = get_user_model().objects.all()
+        queryset = get_user_model().objects.prefetch_related(
+            "following",
+            "followers",
+        )
         nickname = self.request.query_params.get("nickname")
         if nickname:
             queryset = queryset.filter(nickname__icontains=nickname)
@@ -66,3 +71,19 @@ class RetrieveUserView(generics.RetrieveAPIView):
 
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
+
+
+class UserFollowingViewSet(viewsets.ModelViewSet):
+    """Following users"""
+
+    serializer_class = FollowingSerializer
+    queryset = UserFollowing.objects.prefetch_related("user_id", "following_user_id")
+    permission_classes = (IsOwnerFollowing,)
+
+    def create(
+        self, request: Request, *args: tuple, **kwargs: dict
+    ) -> ValidationError | Response:
+        if self.request.user.email != request.data["user_id"]:
+            raise ValidationError("You cannot sign other users!")
+
+        return super().create(request, *args, **kwargs)

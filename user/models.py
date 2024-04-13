@@ -1,6 +1,8 @@
 import os
 import uuid
 from typing import Any, Optional
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import (
     AbstractUser,
     BaseUserManager,
@@ -68,3 +70,30 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+
+class UserFollowing(models.Model):
+    user_id = models.ForeignKey(
+        get_user_model(),
+        related_name="following",
+        on_delete=models.CASCADE,
+    )
+    following_user_id = models.ForeignKey(
+        get_user_model(),
+        related_name="followers",
+        on_delete=models.CASCADE,
+    )
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user_id", "following_user_id"],
+                name="unique_followers",
+            )
+        ]
+
+        ordering = ["-created"]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} follows {self.following_user_id}"
