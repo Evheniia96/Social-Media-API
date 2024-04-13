@@ -60,13 +60,9 @@ class User(AbstractUser):
     username = None
     nickname = models.CharField(_("nickname"), max_length=15, unique=True)
     date_of_birth = models.DateField(_("date of birth"), null=True, blank=True)
-    biography = models.CharField(
-        _("short biography"), max_length=400, blank=True
-    )
+    biography = models.CharField(_("short biography"), max_length=400, blank=True)
     email = models.EmailField(_("email address"), unique=True)
-    profile_image = models.ImageField(
-        blank=True, upload_to=user_image_file_path
-    )
+    profile_image = models.ImageField(blank=True, upload_to=user_image_file_path)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

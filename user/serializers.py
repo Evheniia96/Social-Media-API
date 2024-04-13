@@ -6,13 +6,15 @@ from django.utils.translation import gettext as _
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ("id",
-                  "email",
-                  "password",
-                  "nickname",
-                  "date_of_birth",
-                  "biography",
-                  "profile_image",)
+        fields = (
+            "id",
+            "email",
+            "password",
+            "nickname",
+            "date_of_birth",
+            "biography",
+            "profile_image",
+        )
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
 
     def create(self, validated_data):
