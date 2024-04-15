@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -35,6 +37,18 @@ class CreateUserView(generics.ListCreateAPIView):
             queryset = queryset.filter(nickname__icontains=nickname)
 
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="nickname",
+                type=OpenApiTypes.STR,
+                description="Filtering by nickname (ex. ?nickname=monika)",
+            ),
+        ]
+    )
+    def get(self, request: Request, *args: tuple, **kwargs: dict) -> Response:
+        return super().list(request, *args, **kwargs)
 
 
 class LoginUserView(ObtainAuthToken):

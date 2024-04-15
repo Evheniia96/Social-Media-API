@@ -1,5 +1,6 @@
 from django.db.models import Q
-from django.shortcuts import render
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -65,3 +66,16 @@ class PostViewSet(ModelViewSet):
         serializer,
     ) -> None:
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="hashtag",
+                description="Filter by hashtag insensitive contains (ex. ?hashtag=post)",
+                type=OpenApiTypes.STR,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs) -> Response:
+        """List characters with filter by hashtag"""
+        return super().list(request, *args, **kwargs)
