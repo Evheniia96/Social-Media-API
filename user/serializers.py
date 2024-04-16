@@ -44,6 +44,7 @@ class FollowersSerializer(serializers.ModelSerializer):
         model = UserFollowing
         fields = ("id", "user_id", "created")
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
